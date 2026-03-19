@@ -35,7 +35,15 @@
       "_": "The floor is the implicit decimal point, discovered by following the underscore chain from root: check root._ — is it a string or an object? If object, step into its underscore and repeat. Count steps until you hit a string. That count is the floor depth, and it equals the number of times the block has supernested plus one.",
       "1": "A rendition block has floor 1 — root._ is a string, all content decomposes downward from pscale 0, and addresses are 0.x where x walks the digits after the decimal. This block is a rendition block: floor 1, never supernested, every address begins with 0.",
       "2": "A living block has floor greater than 1 — it has supernested at least once and carries content above and below the decimal. Address 23.45 walks four digits through the tree; the decimal position after the second digit means two levels of accumulated context sit above the original root.",
-      "3": "The floor makes pscale numbers portable across block growth — a node at a given pscale depth means the same structural thing regardless of how many times the block has supernested. The walk just passes through more accumulated context on the way down in a mature block than in a young one."
+      "3": "The floor makes pscale numbers portable across block growth — a node at a given pscale depth means the same structural thing regardless of how many times the block has supernested. The walk just passes through more accumulated context on the way down in a mature block than in a young one.",
+      "4": {
+        "_": "Worked example: a spatial block with floor 3. The underscore ladder is three deep, indicating three place values to the left of the decimal point. Addresses are padded with zeros to fill those three places. Beyond three digits, a decimal point appears. The decimal point marks the relative point of interest; in spatial terms, the scale at which a human inhabits a room.",
+        "1": "Address 100: pscale +2 — village or neighbourhood.",
+        "2": "Address 110: pscale +1 — building.",
+        "3": "Address 111: pscale 0 — room (human scale).",
+        "4": "Address 111.1: pscale -1 — detail within a room (a table, a hearth).",
+        "5": "The walk function is identical for any floor. The pscale derived from a given depth changes — that is what the floor does: it calibrates which depth is human scale."
+      }
     }
   },
   "2": {
