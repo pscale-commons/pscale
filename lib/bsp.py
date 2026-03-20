@@ -14,12 +14,12 @@ Modes:
     bsp(block, _, depth, 'disc')      → disc: all nodes at a depth
 
 CLI:
-    python tidy-up/bsp.py spark              # dir
-    python tidy-up/bsp.py spark 0.21         # spindle
-    python tidy-up/bsp.py spark 0.21 ring    # ring
-    python tidy-up/bsp.py spark 0.21 dir     # subtree
-    python tidy-up/bsp.py spark 0.3 -2 point # point at pscale -2
-    python tidy-up/bsp.py spark _ 3 disc     # disc at depth 3
+    python lib/bsp.py pscale-touchstone              # dir
+    python lib/bsp.py pscale-touchstone 0.21         # spindle
+    python lib/bsp.py pscale-touchstone 0.21 ring    # ring
+    python lib/bsp.py pscale-touchstone 0.21 dir     # subtree
+    python lib/bsp.py pscale-touchstone 0.3 -2 point # point at pscale -2
+    python lib/bsp.py pscale-touchstone _ 3 disc     # disc at depth 3
 
 Address conventions:
     0.x     Delineation (floor 1). Leading 0 is notation, not a key.
