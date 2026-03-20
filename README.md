@@ -14,12 +14,12 @@ BSP is the navigation function. Two implementations are provided:
 
 ```sh
 # Python
-python3 lib/bsp.py pscale-touchstone 0.21          # spindle: root → section 2 → subsection 1
-python3 lib/bsp.py pscale-touchstone               # dir: full tree overview
+python3 bsp.py pscale-touchstone 0.21          # spindle: root → section 2 → subsection 1
+python3 bsp.py pscale-touchstone               # dir: full tree overview
 
 # JavaScript
-node lib/bsp.js pscale-touchstone 0.21
-node lib/bsp.js pscale-touchstone
+node bsp.js pscale-touchstone 0.21
+node bsp.js pscale-touchstone
 ```
 
 ## Format
