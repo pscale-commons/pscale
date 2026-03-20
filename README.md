@@ -4,9 +4,9 @@ A semantic number system for structured knowledge. Pscale blocks are JSON docume
 
 ## Documents
 
-- **spark.json** — The irreducible format specification. A pscale block that teaches pscale by being an operational example of itself. Start here.
-- **flint.json** — Block authoring craft. How to write pscale blocks that work.
-- **slate.json** / **slate.md** — Systems design wisdom for building on pscale.
+- **pscale-touchstone.json** — The irreducible format specification. A pscale block that teaches pscale by being an operational example of itself. Start here.
+- **pscale-guidelines.json** / **pscale-guidelines.md** — Block authoring craft. How to write pscale blocks that work.
+- **pscale-design.json** / **pscale-design.md** — Systems design wisdom for building on pscale.
 
 ## BSP (Block Semantic Positioning)
 
@@ -14,12 +14,12 @@ BSP is the navigation function. Two implementations are provided:
 
 ```sh
 # Python
-python3 lib/bsp.py spark 0.21          # spindle: root → section 2 → subsection 1
-python3 lib/bsp.py spark               # dir: full tree overview
+python3 lib/bsp.py pscale-touchstone 0.21          # spindle: root → section 2 → subsection 1
+python3 lib/bsp.py pscale-touchstone               # dir: full tree overview
 
 # JavaScript
-node lib/bsp.js spark 0.21
-node lib/bsp.js spark
+node lib/bsp.js pscale-touchstone 0.21
+node lib/bsp.js pscale-touchstone
 ```
 
 ## Format
