@@ -3,7 +3,7 @@
 bsp.py — pure-form BSP for pscale JSON blocks.
 
 No tree wrapper, no tuning field, no metadata. The block IS the tree.
-Floor derived from the underscore chain. Everything else is a walk.
+Floor derived from the underscore chain. Digit 0 maps to key '_'.
 
 Modes:
     bsp(block)                        → dir: full tree (depth-1 survey)
@@ -20,6 +20,12 @@ CLI:
     python tidy-up/bsp.py spark 0.21 dir     # subtree
     python tidy-up/bsp.py spark 0.3 -2 point # point at pscale -2
     python tidy-up/bsp.py spark _ 3 disc     # disc at depth 3
+
+Address conventions:
+    0.x     Delineation (floor 1). Leading 0 is notation, not a key.
+    100     Accumulation (floor 3). Digit 1 at top level, zeros = no branch taken.
+    001.1   Floor 3. Two zeros walk underscore chain to floor, then digits below.
+    Digit 0 always maps to key '_' — walking the underscore spine.
 """
 
 import json, sys, os
@@ -50,33 +56,50 @@ def parse_address(number):
 
 
 def walk(block, digits):
-    """Walk the tree collecting underscore texts. Returns (spindle, terminal_node, parent_node, terminal_digit)."""
+    """Walk the tree collecting texts. Digit 0 maps to key '_'.
+    Returns (chain, terminal_node, parent_node, terminal_key)
+    where chain is list of {'text': str, 'depth': int}."""
     chain = []
     node = block
     parent = None
-    last_digit = None
+    last_key = None
+    depth = 0
 
-    # Collect root underscore
-    if isinstance(node, dict) and isinstance(node.get('_'), str):
-        chain.append(node['_'])
+    # Collect root text: follow underscore chain to the floor string.
+    # Floor 1: root._ is the string directly.
+    # Floor N: root._._._ ... N deep to hit the string.
+    if isinstance(node, dict) and '_' in node:
+        inner = node['_']
+        while isinstance(inner, dict) and '_' in inner:
+            inner = inner['_']
+        if isinstance(inner, str):
+            chain.append({'text': inner, 'depth': depth})
 
     for d in digits:
-        if not isinstance(node, dict) or d not in node:
+        key = '_' if d == '0' else d
+        if not isinstance(node, dict) or key not in node:
+            break
+        target = node[key]
+        # Walking '0' into a string '_' means we've hit the floor spine —
+        # this text was already collected when we arrived at this node.
+        if d == '0' and isinstance(target, str):
             break
         parent = node
-        last_digit = d
-        node = node[d]
+        last_key = key
+        node = target
+        depth += 1
         if isinstance(node, str):
-            chain.append(node)
+            chain.append({'text': node, 'depth': depth})
             break
         elif isinstance(node, dict) and isinstance(node.get('_'), str):
-            chain.append(node['_'])
+            chain.append({'text': node['_'], 'depth': depth})
 
-    return chain, node, parent, last_digit
+    return chain, node, parent, last_key
 
 
 def bsp(block, number=None, point=None, mode=None):
     """Pure-form BSP. Block is the tree — no wrapper."""
+    fl = floor_depth(block)
 
     # Dir (full) — no args
     if number is None and point is None and mode is None:
@@ -88,11 +111,23 @@ def bsp(block, number=None, point=None, mode=None):
         nodes = []
         def collect(node, depth, path):
             if depth == target:
-                text = node if isinstance(node, str) else (node.get('_') if isinstance(node, dict) else None)
+                if isinstance(node, str):
+                    text = node
+                elif isinstance(node, dict):
+                    # Resolve underscore chain to floor string
+                    inner = node.get('_')
+                    while isinstance(inner, dict) and '_' in inner:
+                        inner = inner['_']
+                    text = inner if isinstance(inner, str) else None
+                else:
+                    text = None
                 nodes.append({'path': path, 'text': text})
                 return
             if not isinstance(node, dict):
                 return
+            # Walk both underscore and digit children
+            if '_' in node and isinstance(node['_'], dict):
+                collect(node['_'], depth + 1, f'{path}.0' if path else '0')
             for d in '123456789':
                 if d in node:
                     collect(node[d], depth + 1, f'{path}.{d}' if path else d)
@@ -101,16 +136,26 @@ def bsp(block, number=None, point=None, mode=None):
 
     # Parse address and walk
     digits = parse_address(number)
-    chain, terminal, parent, last_digit = walk(block, digits)
-    fl = floor_depth(block)
+    chain, terminal, parent, last_key = walk(block, digits)
 
     # Ring — siblings at terminal
     if point == 'ring':
         if parent is None or not isinstance(parent, dict):
             return {'mode': 'ring', 'siblings': []}
         siblings = []
-        for d in '0123456789':
-            if d == last_digit or d not in parent:
+        # Include '_' as a navigable sibling (digit 0) if it's an object
+        if last_key != '_' and '_' in parent and isinstance(parent['_'], dict):
+            v = parent['_']
+            text = v.get('_') if isinstance(v, dict) else (v if isinstance(v, str) else None)
+            # Resolve nested underscore objects to their eventual string
+            inner = v
+            while isinstance(inner, dict) and '_' in inner and isinstance(inner['_'], dict):
+                inner = inner['_']
+            if isinstance(inner, dict) and isinstance(inner.get('_'), str):
+                text = inner['_']
+            siblings.append({'digit': '0', 'text': text, 'branch': True})
+        for d in '123456789':
+            if d == last_key or d not in parent:
                 continue
             v = parent[d]
             text = v if isinstance(v, str) else (v.get('_') if isinstance(v, dict) else None)
@@ -121,19 +166,23 @@ def bsp(block, number=None, point=None, mode=None):
     if point == 'dir':
         return {'mode': 'dir', 'subtree': terminal}
 
+    # Annotate chain with pscale: pscale = (floor - 1) - depth
+    def pscale_at(depth):
+        return (fl - 1) - depth
+
     # Point — content at a specific pscale
     if mode == 'point' and point is not None:
         ps = int(point) if isinstance(point, str) else point
-        # pscale = (floor - 1) - index, where index 0 is root
-        target_index = (fl - 1) - ps
-        if 0 <= target_index < len(chain):
-            return {'mode': 'point', 'pscale': ps, 'text': chain[target_index]}
-        return {'mode': 'point', 'pscale': ps, 'text': chain[-1] if chain else None}
+        for entry in chain:
+            if pscale_at(entry['depth']) == ps:
+                return {'mode': 'point', 'pscale': ps, 'text': entry['text']}
+        last = chain[-1] if chain else None
+        return {'mode': 'point', 'pscale': ps, 'text': last['text'] if last else None}
 
     # Spindle (default) — annotate with pscale
     nodes = []
-    for i, text in enumerate(chain):
-        nodes.append({'pscale': (fl - 1) - i, 'text': text})
+    for entry in chain:
+        nodes.append({'pscale': pscale_at(entry['depth']), 'text': entry['text']})
     return {'mode': 'spindle', 'nodes': nodes}
 
 
@@ -157,9 +206,22 @@ def fmt_dir(r):
     if 'subtree' in r:
         return json.dumps(tree, indent=2, ensure_ascii=False)
     lines = []
+    def show_underscore(node, prefix=''):
+        """Show underscore chain for floor > 1 blocks."""
+        if isinstance(node, str):
+            return node
+        if isinstance(node, dict):
+            inner = node.get('_')
+            if isinstance(inner, str):
+                return inner
+            if isinstance(inner, dict):
+                return f"(floor chain) → {show_underscore(inner)}"
+        return str(node)
     root = tree.get('_', '')
-    if root:
+    if isinstance(root, str) and root:
         lines.append(f"  _: {root[:200]}{'...' if len(root) > 200 else ''}")
+    elif isinstance(root, dict):
+        lines.append(f"  _: {show_underscore(root)[:200]}")
     for k in sorted(k for k in tree if k != '_'):
         v = tree[k]
         text = v if isinstance(v, str) else (v.get('_', '(branch)') if isinstance(v, dict) else str(v))
