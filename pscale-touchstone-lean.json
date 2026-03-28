@@ -1,0 +1,54 @@
+{
+  "_": "Navigate any pscale JSON block. Three keys: underscore for meaning at position zero, digits 1–9 for branches, curly brackets for depth. Parse a BSP address into digits, walk the tree collecting underscores, return the spindle. This block contains everything needed to implement the walk and all seven modes.",
+  "1": {
+    "_": "Recognise the three key types on sight and handle each correctly during a walk. Underscore holds meaning. Digits hold branches. Objects hold depth. Nothing else exists in a pure-form block.",
+    "1": {
+      "_": "Map digit 0 to the underscore key. Collect the underscore value at each walked node into the spindle array. The underscore chain from root to terminal is the spindle — broad context narrowing to specific content.",
+      "1": "Collect root underscore first, before walking any digits. If root underscore is a string, it is the first spindle entry. If it is an object — supernested or zero-position block — enter via digit 0 instead of collecting.",
+      "2": {
+        "_": "Determine the underscore's semantic form by reading its content. Form 1: describes its own group (self-referential, spatial). Form 2: summarises what the previous group became (backward-facing, temporal). Form 3: states what the group should become (forward-facing, intentional).",
+        "1": "Form 1 produces rendition blocks — documents, specifications, skills. Digits are editorial labels, reorderable.",
+        "2": "Form 2 produces living blocks — histories, journals. Digits are sequential entries. On supernest, the new underscore summarises the completed group.",
+        "3": "Form 3 produces operational blocks — instructions, recipes, kernels, seeds. Digits are steps or components serving the underscore's stated intention."
+      },
+      "3": "Write in zeroth person. Not 'I walk' nor 'you walk' nor 'the system walks' — just 'walk.' The underscore is the implied actor, inside the block, perceiving its siblings.",
+      "4": "Detect zero-position interiors: when an underscore at any depth is subnested into an object with digit children but no underscore of its own, those children are at the 0.x addresses — walk digit 0 into the underscore, then a digit into its content. A block of form {\"_\": {\"1\": ..., \"2\": ...}} is a zero-position block: headless, all content at 0.x, named externally."
+    },
+    "2": {
+      "_": "Accept digits 1 through 9 as branch keys. Each level holds at most nine children. A string value is a leaf. An object value is a branch — its underscore is the branch summary, its digits are its children.",
+      "1": "When a leaf needs children, move its string to the underscore key and add digit children. This is subnesting — local, affects only this node, extends addresses at this branch by one digit.",
+      "2": "When all nine slots fill at the top level, supernest: wrap the entire tree into the root underscore, open digit 1 for new content. Every original address gains a 0 prefix. Floor increments by one."
+    },
+    "3": {
+      "_": "Detect the floor by following the underscore chain from root. If root underscore is a string, floor is 1. If an object with its own underscore, step in and repeat. Count steps to the terminal string. If an object has no underscore, the chain terminates — zero-position interior, floor is the count of underscore keys traversed.",
+      "1": "Compute pscale from floor: node at tree depth d has pscale = floor − d − 1. Floor 1 rendition block: pscale 0 at root, −1 at depth 1, −2 at depth 2.",
+      "2": "Floor 2+ living block: digits before the decimal walk supernested levels, digits after walk content. Address 23.45 walks four digits — two accumulated context, two decomposition.",
+      "3": "Position is semantic. Flat siblings retain full polysemy. Nesting constrains meaning by parent context. Rearranging between flat and nested is a compositional act, not a storage choice."
+    }
+  },
+  "2": {
+    "_": "Implement bsp(block, number, mode?). Strip the decimal point from the number. Split into individual digit characters. Walk the tree collecting underscore text at each object node. Return the result according to the requested mode.",
+    "1": {
+      "_": "Execute the walk. For each digit: if '0', look up key '_'; otherwise look up the digit as a key. If the value is an object, collect its underscore into the spindle and continue. If a string, collect as final entry and stop. If the key is missing, mark the creative frontier and stop.",
+      "1": "Example: bsp(block, 2.1) walks digits 2, 1. Collects root underscore, then branch 2 underscore, then branch 2 child 1 content. Three levels in one call.",
+      "2": "Every zero in an address navigates into an underscore. Address 1.02 walks digit 1, then digit 0 into that node's underscore, then digit 2 into the underscore's second child."
+    },
+    "2": {
+      "_": "Return spindle by default — the array of underscore texts from root through each walked level to the terminal. Every spindle includes the root. Context is structural, not optional.",
+      "1": "Ring mode: return siblings at the terminal point. Find the parent node, collect all its digit children except the walked-to key. Lateral breadth without vertical context.",
+      "2": "Dir mode: return the full tree, or if a number was given, the subtree at the walk's terminal node. Most expensive, most complete.",
+      "3": "Point mode: return one node at a specific pscale depth. Cheapest targeted read.",
+      "4": "Disc mode: return all nodes at a given depth across the entire block. Transversal slice through every branch at one scale."
+    },
+    "3": {
+      "_": "Combine modes as recipes. A bulb is a spindle plus a ring at the landing point. A dashboard is a disc at a given pscale. Start broad with a bare-zero call or dir, narrow with spindles, check breadth with ring.",
+      "1": "bsp(block, 0) walks digit 0 into root underscore. Cheapest orientation. If underscore is a string, returns it. If subnested, enters the zero-position interior.",
+      "2": "Every BSP call costs tokens proportional to what it returns. Dir loads everything. Deep spindle loads every level. Ring loads all siblings. Balance resolution against context budget."
+    }
+  },
+  "3": {
+    "_": "Operational reference. This block is Form 3 — every underscore directs action, every spindle is an instruction sequence. Version 1.0, March 2026. Authored by David Pinto with Claude Code and Claude.ai.",
+    "1": "Pure form: underscore, digits 1–9, curly brackets only. No tuning, no tree wrapper, no skeleton, no mask. Floor derived from underscore chain depth. Walk this structure to walk any pure-form pscale block.",
+    "2": "Companion to pscale-touchstone (Form 1, self-referential, explanatory). Same subject, different form. Where touchstone teaches by being, this block teaches by directing. Use touchstone for understanding, this block for implementation."
+  }
+}
