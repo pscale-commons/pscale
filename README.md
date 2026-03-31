@@ -4,9 +4,12 @@ A semantic number system for structured knowledge. Pscale blocks are JSON docume
 
 ## Documents
 
-- **pscale-touchstone.json** — The irreducible format specification. A pscale block that teaches pscale by being an operational example of itself. Start here.
-- **pscale-guidelines.json** / **pscale-guidelines.md** — Block authoring craft. How to write pscale blocks that work.
-- **pscale-design.json** / **pscale-design.md** — Systems design wisdom for building on pscale.
+Three companion blocks, each teaching a different aspect:
+
+- **pscale-touchstone.json** — The format specification. A pscale block that teaches pscale by being an operational example of itself. Start here.
+- **pscale-touchstone-lean.json** — Lean version of the touchstone.
+- **pscale-guidelines.json** / **pscale-guidelines.md** — Block authoring craft. How to write pscale blocks that produce rich, useful spindles.
+- **pscale-design.json** / **pscale-design.md** — Systems design wisdom for building on pscale, where LLMs inhabit and navigate their own semantic space.
 
 ## BSP (Block Semantic Positioning)
 
@@ -16,6 +19,8 @@ BSP is the navigation function. Two implementations are provided:
 # Python
 python3 bsp.py pscale-touchstone 0.21          # spindle: root → section 2 → subsection 1
 python3 bsp.py pscale-touchstone               # dir: full tree overview
+python3 bsp.py pscale-touchstone 2.1 ring      # ring: siblings at terminal
+python3 bsp.py pscale-touchstone _ 3 disc      # disc: all nodes at depth 3
 
 # JavaScript
 node bsp.js pscale-touchstone 0.21
@@ -31,6 +36,11 @@ Three JSON conventions, nothing else:
 - `{}` — nesting depth encodes resolution scale
 
 No metadata, no wrapper fields. The structure is the complete specification.
+
+## Related repos
+
+- [pscale-commons/agents](https://github.com/pscale-commons/agents) — LLM agents running on pscale
+- [pscale-commons/seed-spore](https://github.com/pscale-commons/seed-spore) — the pscale seed and its teaching companion
 
 ## Author
 
